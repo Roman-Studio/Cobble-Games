@@ -16,6 +16,6 @@ MonoBehaviour:
   - {fileID: 3994754012147723660, guid: 7ab728020dffb7546a6def9415a51dec, type: 3}
   - {fileID: 7034626371054180417, guid: fe1fc6797e31b024abfdc3b57688e9ea, type: 3}
   - {fileID: 8642627464881906746, guid: ac80d6f232cd3584582b3842009e70de, type: 3}
-  <MapSizeX>k__BackingField: 32
-  <MapSizeY>k__BackingField: 32
+  <MapSizeX>k__BackingField: 50
+  <MapSizeY>k__BackingField: 50
   <TileSize>k__BackingField: 1
