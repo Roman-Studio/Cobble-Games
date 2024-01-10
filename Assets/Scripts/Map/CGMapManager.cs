@@ -10,8 +10,8 @@ namespace CobbleGames.Map
         [SerializeField]
         private CGMapGenerator _MapGenerator;
 
-        [SerializeField, ReadOnly]
-        private CGGrid<CGMapTile> _GeneratedGrid;
+        [field: SerializeField, ReadOnly]
+        public CGGrid<CGMapTile> GeneratedGrid { get; private set; }
         
         public override void Initialize()
         {
@@ -23,8 +23,9 @@ namespace CobbleGames.Map
         [Button, EnableIf(nameof(IsPlaying))]
         private void GenerateRandomMap()
         {
-            _GeneratedGrid.ForEach(DestroyTile);
-            _MapGenerator.GenerateNewMap(out _GeneratedGrid);
+            GeneratedGrid.ForEach(DestroyTile);
+            _MapGenerator.GenerateNewMap(out var generatedMapGrid);
+            GeneratedGrid = generatedMapGrid;
         }
 
         private static void DestroyTile(CGMapTile mapTile)

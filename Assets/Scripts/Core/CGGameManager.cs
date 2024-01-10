@@ -1,4 +1,5 @@
 ﻿using System;
+using CobbleGames.Characters;
 using CobbleGames.Map;
 
 namespace CobbleGames.Core
@@ -40,6 +41,7 @@ namespace CobbleGames.Core
         private void Initialize()
         {
             CGMapManager.Instance.Initialize();
+            CGCharactersManager.Instance.Initialize();
             FinishInitialization();
         }
 

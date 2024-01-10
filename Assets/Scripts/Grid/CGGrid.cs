@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace CobbleGames.Grid
 {
@@ -17,6 +18,7 @@ namespace CobbleGames.Grid
 
         [field: SerializeField, ReadOnly] 
         private TElementType[] _GridElements;
+        public IReadOnlyCollection<TElementType> GridElements => _GridElements;
 
         public CGGrid(int sizeX, int sizeY)
         {

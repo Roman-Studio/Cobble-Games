@@ -15,7 +15,7 @@ namespace CobbleGames.Map
 
             if (MapGeneratorPreset.MapTilesPrefabs.Count == 0)
             {
-                Debug.LogError($"[{nameof(CGMapGenerator)}.{nameof(GenerateNewMap)}] There are no map tiles prefabs assigned!");
+                Debug.LogError($"[{nameof(CGMapGenerator)}.{nameof(GenerateNewMap)}] There are no map tiles prefabs assigned!", MapGeneratorPreset);
                 return;
             }
 
