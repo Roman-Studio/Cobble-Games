@@ -1,7 +1,7 @@
 ﻿using NaughtyAttributes;
 using UnityEngine;
 
-namespace CobbleGames.Characters
+namespace CobbleGames.Characters.Presets
 {
     [CreateAssetMenu(fileName = "CharacterPreset", menuName = "Cobble Games/Characters/Preset")]
     public class CGCharacterPreset : ScriptableObject

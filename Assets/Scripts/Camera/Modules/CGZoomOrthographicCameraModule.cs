@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace CobbleGames.Camera.Modules
@@ -38,7 +37,7 @@ namespace CobbleGames.Camera.Modules
 
         private void CalculateZoom()
         {
-            if (MainCamera.BlockCamera || EventSystem.current.IsPointerOverGameObject())
+            if (MainCamera.BlockCamera)
             {
                 return;
             }

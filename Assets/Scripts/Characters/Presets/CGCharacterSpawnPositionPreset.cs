@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CobbleGames.Characters
+namespace CobbleGames.Characters.Presets
 {
     [CreateAssetMenu(fileName = "CharacterSpawnPositionPreset", menuName = "Cobble Games/Characters/Spawn Position Preset")]
     public class CGCharacterSpawnPositionPreset : ScriptableObject

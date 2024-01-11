@@ -16,18 +16,6 @@ namespace CobbleGames.Core
                 }
                 
                 instance = FindObjectOfType<TFinalType>();
-
-                if (instance != null)
-                {
-                    return instance;
-                }
-                
-                var newObject = new GameObject
-                {
-                    name = typeof(TFinalType).Name
-                };
-                
-                instance = newObject.AddComponent<TFinalType>();
                 return instance;
             }
         }
@@ -49,6 +37,14 @@ namespace CobbleGames.Core
             else
             {
                 Destroy(gameObject);
+            }
+        }
+
+        protected virtual void OnDestroy()
+        {
+            if (instance == this)
+            {
+                instance = null;
             }
         }
     }

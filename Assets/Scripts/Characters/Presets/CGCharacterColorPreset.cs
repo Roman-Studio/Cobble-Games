@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CobbleGames.Characters
+namespace CobbleGames.Characters.Presets
 {
     [CreateAssetMenu(fileName = "CharacterColorPreset", menuName = "Cobble Games/Characters/Color Preset")]
     public class CGCharacterColorPreset : ScriptableObject

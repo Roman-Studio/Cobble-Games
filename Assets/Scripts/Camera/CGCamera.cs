@@ -43,9 +43,10 @@ namespace CobbleGames.Camera
             CalculateCamera();
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             UnregisterInputDelegates();
+            base.OnDestroy();
         }
 
         private void RegisterInputDelegates()

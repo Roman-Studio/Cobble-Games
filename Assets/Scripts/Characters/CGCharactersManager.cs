@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using CobbleGames.Characters.Presets;
 using CobbleGames.Core;
 using CobbleGames.Map;
 using NaughtyAttributes;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace CobbleGames.Characters
 {
@@ -23,6 +26,14 @@ namespace CobbleGames.Characters
         
         [SerializeField, ReadOnly]
         private List<CGCharacter> _SpawnedCharacters = new();
+        public IReadOnlyList<CGCharacter> SpawnedCharacters => _SpawnedCharacters;
+
+        public event Action EventSpawnedCharactersChanged;
+        
+        [field: SerializeField, ReadOnly]
+        public CGCharacter SelectedCharacter { get; private set; }
+
+        public event Action EventSelectedCharacterChanged;
         
         public override void Initialize()
         {
@@ -37,6 +48,7 @@ namespace CobbleGames.Characters
             }
         }
 
+        [Button]
         private void SpawnRandomCharacter()
         {
             if (_CharacterPresets.Count == 0)
@@ -58,6 +70,7 @@ namespace CobbleGames.Characters
             newCharacter.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
             newCharacter.Initialize(randomPreset);
             _SpawnedCharacters.Add(newCharacter);
+            EventSpawnedCharactersChanged?.Invoke();
         }
         
         private bool TryGetRandomMapTile(out CGMapTile randomMapTile)
@@ -81,6 +94,17 @@ namespace CobbleGames.Characters
 
             randomMapTile = availableMapTiles[Random.Range(0, availableMapTiles.Count)];
             return true;
+        }
+
+        public void SetSelectedCharacter(CGCharacter selectedCharacter)
+        {
+            var hasChanged = SelectedCharacter != selectedCharacter;
+            SelectedCharacter = selectedCharacter;
+
+            if (hasChanged)
+            {
+                EventSelectedCharacterChanged?.Invoke();
+            }
         }
     }
 }

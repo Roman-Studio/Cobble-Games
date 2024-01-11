@@ -105,6 +105,7 @@ GameObject:
   - component: {fileID: 653687539818963191}
   - component: {fileID: 775584432367076844}
   - component: {fileID: 284680232273903160}
+  - component: {fileID: 4683224115793619818}
   m_Layer: 0
   m_Name: MainCamera
   m_TagString: MainCamera
@@ -246,7 +247,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dd0ef8aac424570b62fe3d8aecacdd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _DontDestroyOnLoad: 1
+  _DontDestroyOnLoad: 0
   <UnityCamera>k__BackingField: {fileID: 1861894358958221410}
   _CameraModules:
   - {fileID: 6425320694986353557}
@@ -256,6 +257,22 @@ MonoBehaviour:
   <CameraConfig>k__BackingField: {fileID: 11400000, guid: 3ae7206d51c3fb643b1993613dea3208,
     type: 2}
   <BlockCamera>k__BackingField: 0
+--- !u!114 &4683224115793619818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020863280517059300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c49b4cc203aa6414fae5c798d1d0e7d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EventMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_MaxRayIntersections: 0
 --- !u!1 &2774033903396620133
 GameObject:
   m_ObjectHideFlags: 0
