@@ -54,4 +54,7 @@ MonoBehaviour:
     type: 3}
   _CharacterSpawnPositionPreset: {fileID: 11400000, guid: 058b8faf1475fd2469a74b782069c6b0,
     type: 2}
+  <CharacterStaminaPreset>k__BackingField: {fileID: 11400000, guid: 0abd29beea900194084ee33f9211ca83,
+    type: 2}
   _SpawnedCharacters: []
+  <SelectedCharacter>k__BackingField: {fileID: 0}

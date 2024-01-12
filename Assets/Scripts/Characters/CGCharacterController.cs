@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CobbleGames.PathFinding;
 using UnityEngine;
 
@@ -9,8 +10,20 @@ namespace CobbleGames.Characters
         [SerializeField]
         private float _MovementSpeed = 2f;
 
+        public float MovementSpeed
+        {
+            get => _MovementSpeed;
+            set => _MovementSpeed = value;
+        }
+
         [SerializeField]
         private float _RotationSpeed = 4f;
+        
+        public float RotationSpeed
+        {
+            get => _RotationSpeed;
+            set => _RotationSpeed = value;
+        }
 
         [SerializeField]
         private float _TargetTolerance = 0.1f;
@@ -18,6 +31,9 @@ namespace CobbleGames.Characters
         private readonly List<Vector3> _PathVectors = new();
         
         public Vector3 CurrentMovementDirection { get; private set; }
+
+        public event Action EventNextMovementTargetPositionChanged;
+        
 
         private void Update()
         {
@@ -39,11 +55,12 @@ namespace CobbleGames.Characters
             if (Vector3.Distance(currentPosition, nextTargetPosition) <= _TargetTolerance)
             {
                 _PathVectors.RemoveAt(0);
+                EventNextMovementTargetPositionChanged?.Invoke();
                 return;
             }
             
             CurrentMovementDirection = (nextTargetPosition - currentPosition).normalized;
-            var newPosition = currentPosition + CurrentMovementDirection * (_MovementSpeed * Time.deltaTime);
+            var newPosition = currentPosition + CurrentMovementDirection * (MovementSpeed * Time.deltaTime);
             transform.position = newPosition;
         }
 
@@ -55,7 +72,7 @@ namespace CobbleGames.Characters
             }
 
             var targetRotation = Quaternion.LookRotation(CurrentMovementDirection);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _RotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
         }
 
         public void SetPathVectors(IEnumerable<Transform> pathTransforms)
@@ -66,6 +83,8 @@ namespace CobbleGames.Characters
             {
                 _PathVectors.Add(pathTransform.position);
             }
+            
+            EventNextMovementTargetPositionChanged?.Invoke();
         }
 
         public void SetPathVectors(IEnumerable<Vector3> pathVectors)
@@ -76,6 +95,8 @@ namespace CobbleGames.Characters
             {
                 _PathVectors.Add(pathTransform);
             }
+            
+            EventNextMovementTargetPositionChanged?.Invoke();
         }
 
         public void SetPathVectors(IEnumerable<ICGPathFindingNode> pathFindingNodes)
@@ -86,6 +107,8 @@ namespace CobbleGames.Characters
             {
                 _PathVectors.Add(pathFindingNode.NodePosition);
             }
+            
+            EventNextMovementTargetPositionChanged?.Invoke();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using CobbleGames.Characters.Presets;
@@ -24,6 +25,9 @@ namespace CobbleGames.Characters
         [SerializeField, Expandable]
         private CGCharacterSpawnPositionPreset _CharacterSpawnPositionPreset;
         
+        [field: SerializeField]
+        public CGCharacterStaminaPreset CharacterStaminaPreset { get; private set; }
+        
         [SerializeField, ReadOnly]
         private List<CGCharacter> _SpawnedCharacters = new();
         public IReadOnlyList<CGCharacter> SpawnedCharacters => _SpawnedCharacters;
@@ -34,10 +38,15 @@ namespace CobbleGames.Characters
         public CGCharacter SelectedCharacter { get; private set; }
 
         public event Action EventSelectedCharacterChanged;
+
+        private Coroutine _EnergyRegenerationCoroutine;
+
+        public event Action<float> EventRegenerateCharacterEnergy;
         
         public void Initialize()
         {
             SpawnRandomCharacters(_CharactersToSpawn);
+            StartEnergyRegenerator();
         }
 
         private void SpawnRandomCharacters(int charactersToSpawn)
@@ -104,6 +113,27 @@ namespace CobbleGames.Characters
             if (hasChanged)
             {
                 EventSelectedCharacterChanged?.Invoke();
+            }
+        }
+
+        private void StartEnergyRegenerator()
+        {
+            if (_EnergyRegenerationCoroutine != null)
+            {
+                StopCoroutine(_EnergyRegenerationCoroutine);
+            }
+
+            _EnergyRegenerationCoroutine = StartCoroutine(EnergyRegenerator());
+        }
+
+        private IEnumerator EnergyRegenerator()
+        {
+            var delay = new WaitForSeconds(CharacterStaminaPreset.StaminaRegenerationTimeInterval);
+            
+            while (true)
+            {
+                yield return delay;
+                EventRegenerateCharacterEnergy?.Invoke(CharacterStaminaPreset.StaminaRegenerationValue);
             }
         }
     }
