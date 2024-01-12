@@ -1,4 +1,5 @@
 ﻿using CobbleGames.Grid;
+using CobbleGames.PathFinding;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -27,6 +28,9 @@ namespace CobbleGames.Map
                 }
             }
 
+            AssignNeighbourMapTiles(generatedMapGrid);
+            InitializePathFinding(generatedMapGrid);
+            
             var mapPosition = transform;
             mapPosition.position = new Vector3(MapGeneratorPreset.MapSizeX / 2f, mapPosition.position.y, MapGeneratorPreset.MapSizeY / -2f);
         }
@@ -39,6 +43,20 @@ namespace CobbleGames.Map
             var mapOriginPosition = transform.position;
             spawnedMapTile.transform.position = new Vector3(mapOriginPosition.x - y * MapGeneratorPreset.TileSize, mapOriginPosition.y, mapOriginPosition.z + x * MapGeneratorPreset.TileSize);
             targetGrid.TrySetElement(x, y, spawnedMapTile);
+        }
+
+        private static void AssignNeighbourMapTiles(CGGrid<CGMapTile> generatedGrid)
+        {
+            foreach (var mapTile in generatedGrid.GridElements)
+            {
+                mapTile.GetNeighbourMapTiles(generatedGrid);
+            }
+        }
+
+        private static void InitializePathFinding(CGGrid<CGMapTile> generatedGrid)
+        {
+            generatedGrid.CastGrid<ICGPathFindingNode>(out var pathFindingNodesGrid);
+            CGPathFindingManager.Instance.Initialize(pathFindingNodesGrid);
         }
     }
 }

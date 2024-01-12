@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using NaughtyAttributes;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace CobbleGames.Grid
 {
@@ -18,13 +17,31 @@ namespace CobbleGames.Grid
 
         [field: SerializeField, ReadOnly] 
         private TElementType[] _GridElements;
-        public IReadOnlyCollection<TElementType> GridElements => _GridElements;
+        public IReadOnlyList<TElementType> GridElements => _GridElements;
 
         public CGGrid(int sizeX, int sizeY)
         {
             SizeX = sizeX;
             SizeY = sizeY;
             _GridElements = new TElementType[SizeX * SizeY];
+        }
+
+        public void CastGrid<TOtherType>(out CGGrid<TOtherType> castedGrid)
+            where TOtherType : ICGGridElement
+        {
+            castedGrid = new CGGrid<TOtherType>(SizeX, SizeY);
+            
+            for (var i = 0; i < _GridElements.Length; i++)
+            {
+                if (_GridElements[i] is TOtherType castedType)
+                {
+                    castedGrid._GridElements[i] = castedType;
+                }
+                else
+                {
+                    castedGrid._GridElements[i] = default;
+                }
+            }
         }
 
         public bool TryGetElement(int x, int y, out TElementType foundElement)

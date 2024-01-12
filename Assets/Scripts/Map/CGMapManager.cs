@@ -13,7 +13,7 @@ namespace CobbleGames.Map
         [field: SerializeField, ReadOnly]
         public CGGrid<CGMapTile> GeneratedGrid { get; private set; }
         
-        public override void Initialize()
+        public void Initialize()
         {
             GenerateRandomMap();
         }

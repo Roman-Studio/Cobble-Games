@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using CobbleGames.PathFinding;
 using UnityEngine;
 
 namespace CobbleGames.Characters
@@ -57,13 +58,33 @@ namespace CobbleGames.Characters
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, _RotationSpeed * Time.deltaTime);
         }
 
-        public void SetPathVectorsFromTransforms(IEnumerable<Transform> pathTransforms)
+        public void SetPathVectors(IEnumerable<Transform> pathTransforms)
         {
             _PathVectors.Clear();
             
             foreach (var pathTransform in pathTransforms)
             {
                 _PathVectors.Add(pathTransform.position);
+            }
+        }
+
+        public void SetPathVectors(IEnumerable<Vector3> pathVectors)
+        {
+            _PathVectors.Clear();
+
+            foreach (var pathTransform in pathVectors)
+            {
+                _PathVectors.Add(pathTransform);
+            }
+        }
+
+        public void SetPathVectors(IEnumerable<ICGPathFindingNode> pathFindingNodes)
+        {
+            _PathVectors.Clear();
+
+            foreach (var pathFindingNode in pathFindingNodes)
+            {
+                _PathVectors.Add(pathFindingNode.NodePosition);
             }
         }
     }

@@ -1,4 +1,6 @@
 ﻿using CobbleGames.Characters.Presets;
+using CobbleGames.PathFinding;
+using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -23,6 +25,9 @@ namespace CobbleGames.Characters
 
         [SerializeField]
         private Renderer _CharacterRenderer;
+
+        [SerializeField]
+        private CGCharacterController _CharacterController;
         
         [field: SerializeField]
         public UnityEvent EventCharacterSelected { get; private set; }
@@ -113,6 +118,14 @@ namespace CobbleGames.Characters
         private void OnDeselectCharacter()
         {
             EventCharacterDeselected?.Invoke();
+        }
+
+        public void MoveCharacter(Vector3 targetPosition)
+        {
+            if (CGPathFindingManager.Instance.FindPath(transform.position, targetPosition, out var foundPath))
+            {
+                _CharacterController.SetPathVectors(foundPath);
+            }
         }
     }
 }

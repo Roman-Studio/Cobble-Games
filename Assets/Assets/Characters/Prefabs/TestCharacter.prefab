@@ -105,6 +105,7 @@ MonoBehaviour:
   <Stamina>k__BackingField: 0
   <CharacterColor>k__BackingField: {r: 0, g: 0, b: 0, a: 0}
   _CharacterRenderer: {fileID: 8875406974568669388}
+  _CharacterController: {fileID: 8106930334536964938}
   <EventCharacterSelected>k__BackingField:
     m_PersistentCalls:
       m_Calls:
@@ -135,6 +136,10 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  StartX: 0
+  StartY: 0
+  EndX: 0
+  EndY: 0
 --- !u!114 &8106930334536964938
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -149,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _MovementSpeed: 2
   _RotationSpeed: 4
-  _TargetTolerance: 0.1
+  _TargetTolerance: 0.01
 --- !u!54 &3290992317419128294
 Rigidbody:
   m_ObjectHideFlags: 0

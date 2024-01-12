@@ -35,7 +35,7 @@ namespace CobbleGames.Characters
 
         public event Action EventSelectedCharacterChanged;
         
-        public override void Initialize()
+        public void Initialize()
         {
             SpawnRandomCharacters(_CharactersToSpawn);
         }

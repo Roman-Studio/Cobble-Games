@@ -34,7 +34,7 @@ namespace CobbleGames.Core
                     DontDestroyOnLoad(gameObject);
                 }
             }
-            else
+            else if(instance != this)
             {
                 Destroy(gameObject);
             }

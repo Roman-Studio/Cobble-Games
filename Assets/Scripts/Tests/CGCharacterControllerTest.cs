@@ -18,7 +18,7 @@ namespace CobbleGames.Tests
         [Button, EnableIf(nameof(IsPlaying))]
         private void TestPath()
         {
-            _CharacterController.SetPathVectorsFromTransforms(_PathTransforms);
+            _CharacterController.SetPathVectors(_PathTransforms);
         }
     }
 }

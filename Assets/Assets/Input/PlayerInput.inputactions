@@ -1,5 +1,5 @@
 {
-    "name": "CameraInput",
+    "name": "PlayerInput",
     "maps": [
         {
             "name": "CameraMovement",
@@ -321,6 +321,54 @@
                     "processors": "Scale(factor=10)",
                     "groups": "Gamepad",
                     "action": "Zoom",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Player",
+            "id": "a73dfb78-baa0-4f44-825b-58d64d3ead49",
+            "actions": [
+                {
+                    "name": "SelectMovementTarget",
+                    "type": "Button",
+                    "id": "c762a878-9e29-4b51-858f-79c853095898",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectMovementTargetPosition",
+                    "type": "Value",
+                    "id": "d697e0f5-77e7-4bd3-bece-b4bad9b1b0bb",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "1274bc78-025a-4475-a137-edb4f855a376",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "SelectMovementTarget",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "44ba1833-aed3-47f6-ad81-28eeb3acb3f6",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard",
+                    "action": "SelectMovementTargetPosition",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
