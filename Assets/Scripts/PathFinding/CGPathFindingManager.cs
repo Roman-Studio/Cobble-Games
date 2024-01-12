@@ -96,12 +96,6 @@ namespace CobbleGames.PathFinding
             {
                 return false;
             }
-            
-            foreach (var pathFindingNode in _CurrentNodes.GridElements)
-            {
-                pathFindingNode.GCost = 0;
-                pathFindingNode.ParentNode = null;
-            }
 
             var jobNodes = new NativeArray<CGPathFindingNodeData>(_CurrentNodes.SizeX * _CurrentNodes.SizeY, Allocator.TempJob);
 
@@ -114,9 +108,9 @@ namespace CobbleGames.PathFinding
                     X = node.X,
                     Y = node.Y,
                     Index = i,
-                    GCost = float.MaxValue,
-                    GCostModifier = node.GCost,
-                    HCost = 0,
+                    WalkingCost = float.MaxValue,
+                    WalkingCostModifier = node.WalkingCost,
+                    DistanceToTarget = 0,
                     IsWalkable = node.IsWalkable,
                     ParentNodeIndex = -1
                 };

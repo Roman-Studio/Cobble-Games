@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using CobbleGames.Grid;
+﻿using CobbleGames.Grid;
 using UnityEngine;
 
 namespace CobbleGames.PathFinding
@@ -7,14 +6,7 @@ namespace CobbleGames.PathFinding
     public interface ICGPathFindingNode : ICGGridElement
     {
         Vector3 NodePosition { get; }
-        
-        float GCost { get; set; }
-        float HCost { get; set; }
-        float FCost => GCost + HCost;
-        
+        float WalkingCost { get; }
         bool IsWalkable { get; }
-        
-        IReadOnlyCollection<ICGPathFindingNode> NeighbourNodes { get; }
-        ICGPathFindingNode ParentNode { get; set; }
     }
 }

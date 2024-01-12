@@ -77,8 +77,8 @@ namespace CobbleGames.PathFinding
             }
             
             var startNode = _PathFindingNodes[GetNodeIndex(StartNodePosition.x, StartNodePosition.y, GridSize.x)];
-            startNode.GCost = 0;
-            startNode.HCost = CalculateDistanceCost(new int2(startNode.X, startNode.Y), EndNodePosition);
+            startNode.WalkingCost = 0;
+            startNode.DistanceToTarget = CalculateDistanceCost(new int2(startNode.X, startNode.Y), EndNodePosition);
 
             _PathFindingNodes[startNode.Index] = startNode;
             _OpenList.Add(startNode.Index);
@@ -139,16 +139,16 @@ namespace CobbleGames.PathFinding
                     continue;
                 }
                     
-                var tentativeGCost = currentNode.GCost + CalculateDistanceCost(new int2(currentNode.X, currentNode.Y), neighbourPosition);
+                var tentativeWalkingCost = currentNode.WalkingCost + CalculateDistanceCost(new int2(currentNode.X, currentNode.Y), neighbourPosition);
 
-                if (!(tentativeGCost < neighbourNode.GCost))
+                if (!(tentativeWalkingCost < neighbourNode.WalkingCost))
                 {
                     continue;
                 }
                     
                 neighbourNode.ParentNodeIndex = currentNode.Index;
-                neighbourNode.GCost = tentativeGCost;
-                neighbourNode.HCost = CalculateDistanceCost(neighbourPosition, EndNodePosition);
+                neighbourNode.WalkingCost = tentativeWalkingCost;
+                neighbourNode.DistanceToTarget = CalculateDistanceCost(neighbourPosition, EndNodePosition);
                 _PathFindingNodes[neighbourNodeIndex] = neighbourNode;
 
                 if (!_OpenList.Contains(neighbourNodeIndex))
@@ -205,7 +205,7 @@ namespace CobbleGames.PathFinding
             {
                 var testedPathFindingNode = pathFindingNodes[openList[i]];
                 
-                if (testedPathFindingNode.FCost < lowestCostNode.FCost) 
+                if (testedPathFindingNode.TotalCost < lowestCostNode.TotalCost) 
                 {
                     lowestCostNode = testedPathFindingNode;
                 }

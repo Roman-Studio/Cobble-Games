@@ -24,19 +24,7 @@ namespace CobbleGames.Map
         public int Y { get; set; }
 
         public Vector3 NodePosition => TileSurfaceCenter.position;
-
-        [SerializeField, ReadOnly, Foldout("Debug")]
-        private float _GCost;
-
-        public float GCost
-        {
-            get => _GCost;
-            set => _GCost = value + _TileMovementCost;
-        }
-        
-        [field: SerializeField, ReadOnly, Foldout("Debug")]
-        public float HCost { get; set; }
-        
+        public float WalkingCost => _TileMovementCost;
         public bool IsWalkable => _IsWalkable;
 
         [SerializeField, ReadOnly, Foldout("Debug")]
@@ -105,9 +93,5 @@ namespace CobbleGames.Map
             
             _NeighbourMapTiles.Add(foundMapTile);
         }
-
-        public IReadOnlyCollection<ICGPathFindingNode> NeighbourNodes => _NeighbourMapTiles;
-        
-        public ICGPathFindingNode ParentNode { get; set; }
     }
 }

@@ -7,17 +7,17 @@
         
         public int Index { get; set; }
         
-        public float GCostModifier { get; set; }
+        public float WalkingCostModifier { get; set; }
 
-        private float _GCost;
-        public float GCost
+        private float _WalkingCost;
+        public float WalkingCost
         {
-            get => _GCost;
-            set => _GCost = value + GCostModifier;
+            get => _WalkingCost;
+            set => _WalkingCost = value + WalkingCostModifier;
         }
         
-        public float HCost { get; set; }
-        public float FCost => GCost + HCost;
+        public float DistanceToTarget { get; set; }
+        public float TotalCost => WalkingCost + DistanceToTarget;
         
         public bool IsWalkable { get; set; }
 
