@@ -5,6 +5,7 @@ using System.Linq;
 using CobbleGames.Characters.Presets;
 using CobbleGames.Core;
 using CobbleGames.Map;
+using CobbleGames.PathFinding;
 using NaughtyAttributes;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -43,6 +44,9 @@ namespace CobbleGames.Characters
 
         public event Action<float> EventRegenerateCharacterEnergy;
         
+        private readonly Dictionary<CGCharacter, ICGPathFindingNode> _CharacterPathFindingTargets = new();
+        public IReadOnlyDictionary<CGCharacter, ICGPathFindingNode> CharacterPathFindingTargets => _CharacterPathFindingTargets;
+        
         public void Initialize()
         {
             SpawnRandomCharacters(_CharactersToSpawn);
@@ -77,7 +81,7 @@ namespace CobbleGames.Characters
             var newCharacter = Instantiate(_CharacterPrefab, transform).GetComponent<CGCharacter>();
             newCharacter.transform.position = randomMapTile.TileSurfaceCenter.position;
             newCharacter.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-            newCharacter.Initialize(randomPreset);
+            newCharacter.Initialize(randomPreset, randomMapTile);
             _SpawnedCharacters.Add(newCharacter);
             EventSpawnedCharactersChanged?.Invoke();
         }
@@ -135,6 +139,16 @@ namespace CobbleGames.Characters
                 yield return delay;
                 EventRegenerateCharacterEnergy?.Invoke(CharacterStaminaPreset.StaminaRegenerationValue);
             }
+        }
+
+        public void AddCharacterPathFindingTarget(CGCharacter character, ICGPathFindingNode targetMapTile)
+        {
+            _CharacterPathFindingTargets[character] = targetMapTile;
+        }
+
+        public void RemoveCharacterPathFindingTarget(CGCharacter character)
+        {
+            _CharacterPathFindingTargets.Remove(character);
         }
     }
 }

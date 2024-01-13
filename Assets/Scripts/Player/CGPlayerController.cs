@@ -62,6 +62,16 @@ namespace CobbleGames.Player
             }
             
             CGCharactersManager.Instance.SelectedCharacter.MoveCharacter(pathFindingNode.NodePosition);
+
+            foreach (var spawnedCharacter in CGCharactersManager.Instance.SpawnedCharacters)
+            {
+                if (spawnedCharacter == CGCharactersManager.Instance.SelectedCharacter)
+                {
+                    continue;
+                }
+                
+                spawnedCharacter.FollowCharacter(CGCharactersManager.Instance.SelectedCharacter);
+            }
         }
     }
 }

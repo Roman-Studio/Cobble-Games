@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using CobbleGames.Core;
 using CobbleGames.Grid;
 using Unity.Collections;
@@ -15,13 +14,11 @@ namespace CobbleGames.PathFinding
         public const float MoveDiagonalCostModifier = 1.4f;
 
         [SerializeField]
-        private float _GridFromWorldPositionDetectionTolerance = 0.5f;
+        private float _GridFromWorldPositionDetectionTolerance = 1f;
+        public float GridFromWorldPositionDetectionTolerance => _GridFromWorldPositionDetectionTolerance;
         
         private CGGrid<ICGPathFindingNode> _CurrentNodes;
 
-        private readonly List<ICGPathFindingNode> _OpenList = new();
-        private readonly List<ICGPathFindingNode> _ClosedList = new();
-        
         public void Initialize(CGGrid<ICGPathFindingNode> nodesGrid)
         {
             _CurrentNodes = nodesGrid;
@@ -33,7 +30,7 @@ namespace CobbleGames.PathFinding
 
             foreach (var pathFindingNode in _CurrentNodes.GridElements)
             {
-                if (!(worldPosition - pathFindingNode.NodePosition).magnitude.IsInRangeInclusive(-_GridFromWorldPositionDetectionTolerance, _GridFromWorldPositionDetectionTolerance))
+                if (!pathFindingNode.NodeBounds.Contains(worldPosition))
                 {
                     continue;
                 }

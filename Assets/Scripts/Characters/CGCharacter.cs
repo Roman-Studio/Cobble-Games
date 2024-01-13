@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CobbleGames.Characters.Presets;
+using CobbleGames.Characters.UI;
+using CobbleGames.Map;
 using CobbleGames.PathFinding;
 using NaughtyAttributes;
 using UnityEngine;
@@ -9,7 +12,7 @@ using UnityEngine.EventSystems;
 
 namespace CobbleGames.Characters
 {
-    public class CGCharacter : MonoBehaviour, IPointerClickHandler
+    public class CGCharacter : MonoBehaviour, IPointerClickHandler, ICGTileAssignable
     {
         [field: SerializeField]
         public float MovementSpeed { get; private set; }
@@ -54,13 +57,62 @@ namespace CobbleGames.Characters
         [field: SerializeField]
         public Color CharacterColor { get; private set; }
         
+        [SerializeField, ReadOnly]
+        private CGMapTile _CurrentMapTile;
+
+        public CGMapTile CurrentMapTile
+        {
+            get => _CurrentMapTile; 
+            set
+            {
+                if (_CurrentMapTile != null)
+                {
+                    _PreviousMapTiles.Add(_CurrentMapTile);
+
+                    if (_PreviousMapTiles.Count > CGCharactersManager.Instance.SpawnedCharacters.Count)
+                    {
+                        _PreviousMapTiles.RemoveAt(0);
+                    }
+                }
+
+                _CurrentMapTile = value;
+            }
+        }
+
+        [SerializeField, ReadOnly]
+        private List<CGMapTile> _PreviousMapTiles = new();
+        
         private List<ICGPathFindingNode> _CurrentCharacterPath = new();
+        public ICGPathFindingNode NextPathNode
+        {
+            get
+            {
+                if (_CurrentCharacterPath == null)
+                {
+                    return null;
+                }
+
+                return _CurrentCharacterPath.Count == 0 ? null : _CurrentCharacterPath[0];
+            }
+        }
+        
+        [field: SerializeField, ReadOnly]
+        public CGCharacter FollowedCharacter { get; private set; }
+        
+        [SerializeField, ReadOnly]
+        private List<CGCharacter> _FollowingCharacters = new();
 
         [SerializeField]
         private Renderer _CharacterRenderer;
 
         [SerializeField]
         private CGCharacterController _CharacterController;
+
+        [SerializeField]
+        private CGPathDrawer _CharacterPathDrawer;
+
+        [SerializeField]
+        private CGCharacterTracker _CharacterTracker;
         
         [field: SerializeField]
         public UnityEvent EventCharacterSelected { get; private set; }
@@ -68,47 +120,62 @@ namespace CobbleGames.Characters
         [field: SerializeField]
         public UnityEvent EventCharacterDeselected { get; private set; }
 
-        public void Initialize(CGCharacterPreset characterPreset)
+        public void Initialize(CGCharacterPreset characterPreset, CGMapTile startMapTile)
         {
             Initialize(characterPreset.GetRandomMovementSpeed(), characterPreset.GetRandomRotationSpeed(),
-            characterPreset.GetRandomStamina(), characterPreset.CharacterRandomColorPreset.GetRandomColor());
+            characterPreset.GetRandomStamina(), characterPreset.CharacterRandomColorPreset.GetRandomColor(), startMapTile);
         }
 
-        public void Initialize(float movementSpeed, float rotationSpeed, float stamina, Color characterColor)
+        public void Initialize(float movementSpeed, float rotationSpeed, float stamina, Color characterColor, CGMapTile startMapTile)
         {
             MovementSpeed = movementSpeed;
             RotationSpeed = rotationSpeed;
             Stamina = stamina;
             CurrentStamina = Stamina;
+            
             CharacterColor = characterColor;
             _CharacterRenderer.material.color = CharacterColor;
+            _CharacterPathDrawer.UpdateLineColor(CharacterColor);
+            
+            _CharacterTracker.Set(this);
+            
+            startMapTile.AssignObject(this);
+            UpdateCharacterPathDrawer();
             RegisterEvents();
         }
 
         private void RegisterEvents()
         {
-            _CharacterController.EventNextMovementTargetPositionChanged += UpdateCharacterSpeed;
-            
-            if (CGCharactersManager.Instance == null)
+            _CharacterController.EventNextMovementTargetPositionChanged += OnNextMovementTargetPositionChanged;
+            _CharacterController.EventCurrentPathChanged += OnCurrentPathChanged;
+
+            if (CGCharactersManager.Instance != null)
             {
-                return;
+                CGCharactersManager.Instance.EventSelectedCharacterChanged += OnSelectedCharacterChanged;
+                CGCharactersManager.Instance.EventRegenerateCharacterEnergy += RegenerateCharacterStamina;
             }
-            
-            CGCharactersManager.Instance.EventSelectedCharacterChanged += OnSelectedCharacterChanged;
-            CGCharactersManager.Instance.EventRegenerateCharacterEnergy += RegenerateCharacterStamina;
+
+            if (CGMapManager.Instance != null)
+            {
+                CGMapManager.Instance.EventAnyGridStateChanged += UpdateFollowingCharacters;
+            }
         }
 
         private void UnregisterEvents()
         {
-            _CharacterController.EventNextMovementTargetPositionChanged -= UpdateCharacterSpeed;
-            
-            if (CGCharactersManager.Instance == null)
+            _CharacterController.EventNextMovementTargetPositionChanged -= OnNextMovementTargetPositionChanged;
+            _CharacterController.EventCurrentPathChanged -= OnCurrentPathChanged;
+
+            if (CGCharactersManager.Instance != null)
             {
-                return;
+                CGCharactersManager.Instance.EventSelectedCharacterChanged -= OnSelectedCharacterChanged;
+                CGCharactersManager.Instance.EventRegenerateCharacterEnergy -= RegenerateCharacterStamina;
             }
             
-            CGCharactersManager.Instance.EventSelectedCharacterChanged -= OnSelectedCharacterChanged;
-            CGCharactersManager.Instance.EventRegenerateCharacterEnergy -= RegenerateCharacterStamina;
+            if (CGMapManager.Instance != null)
+            {
+                CGMapManager.Instance.EventAnyGridStateChanged -= UpdateFollowingCharacters;
+            }
         }
 
         private void OnDestroy()
@@ -157,12 +224,18 @@ namespace CobbleGames.Characters
 
         private void OnDeselectCharacter()
         {
+            ClearFollowingCharacters();
             EventCharacterDeselected?.Invoke();
         }
 
         public void MoveCharacter(Vector3 targetPosition)
         {
-            if (!CGPathFindingManager.Instance.FindPath(transform.position, targetPosition, out var foundPath))
+            MoveCharacter(transform.position, targetPosition);
+        }
+        
+        public void MoveCharacter(Vector3 startPosition, Vector3 targetPosition)
+        {
+            if (!CGPathFindingManager.Instance.FindPath(startPosition, targetPosition, out var foundPath))
             {
                 return;
             }
@@ -171,9 +244,34 @@ namespace CobbleGames.Characters
             _CharacterController.SetPathVectors(foundPath);
         }
 
+        private void OnNextMovementTargetPositionChanged()
+        {
+            if (_CurrentCharacterPath == null || _CurrentCharacterPath.Count == 0)
+            {
+                return;
+            }
+
+            if (NextPathNode is CGMapTile mapTile)
+            {
+                mapTile.AssignObject(this);
+            }
+            
+            CurrentStamina -= NextPathNode.WalkingCost * CGCharactersManager.Instance.CharacterStaminaPreset.StaminaCostMultiplier;
+            _CurrentCharacterPath.RemoveAt(0);
+            UpdateCharacterPathDrawer();
+            UpdateCharacterSpeed();
+            UpdateFollowingCharacters();
+        }
+
+        private void OnCurrentPathChanged()
+        {
+            UpdateCharacterPathDrawer();
+            UpdateCharacterSpeed();
+        }
+
         private void UpdateCharacterSpeed()
         {
-            if (_CurrentCharacterPath.Count == 0)
+            if (_CurrentCharacterPath == null || _CurrentCharacterPath.Count == 0)
             {
                 return;
             }
@@ -191,17 +289,80 @@ namespace CobbleGames.Characters
                 return;
             }
             
-            var nextPathNode = _CurrentCharacterPath[0];
-            CurrentStamina -= nextPathNode.WalkingCost * CGCharactersManager.Instance.CharacterStaminaPreset.StaminaCostMultiplier;
+            var nextPathNode = NextPathNode;
             _CharacterController.MovementSpeed = MovementSpeed / nextPathNode.WalkingCost;
             _CharacterController.RotationSpeed = RotationSpeed / nextPathNode.WalkingCost;
-            _CurrentCharacterPath.RemoveAt(0);
         }
         
         private void RegenerateCharacterStamina(float valueToAdd)
         {
             CurrentStamina += valueToAdd;
             UpdateCharacterSpeed();
+        }
+        
+        private void UpdateCharacterPathDrawer()
+        {
+            #if PATHFINDING_DEBUG
+            _CharacterPathDrawer.UpdateLine(_CurrentCharacterPath);
+            #endif
+        }
+
+        public void FollowCharacter(CGCharacter followedCharacter)
+        {
+            if (FollowedCharacter != null)
+            {
+                FollowedCharacter._FollowingCharacters.Remove(this);
+            }
+            
+            FollowedCharacter = followedCharacter;
+
+            if (followedCharacter == null)
+            {
+                return;
+            }
+            
+            FollowedCharacter._FollowingCharacters.Add(this);
+        }
+
+        private void UpdateFollowingCharacters()
+        {
+            var followingCharactersByDistance = _FollowingCharacters.OrderBy(character => character._CurrentCharacterPath.Count).ToList();
+            
+            for (var i = 0; i < followingCharactersByDistance.Count; i++)
+            {
+                if (!TryGetTargetNodeForFollowingCharacter(i, out var foundPathFindingNode))
+                {
+                    continue;
+                }
+                
+                var characterToMove = followingCharactersByDistance[i];
+                characterToMove.MoveCharacter(characterToMove.NextPathNode?.NodePosition ?? characterToMove.transform.position, foundPathFindingNode.NodePosition);
+            }
+        }
+
+        private bool TryGetTargetNodeForFollowingCharacter(int followingCharacterIndex, out ICGPathFindingNode foundPathFindingNode)
+        {
+            foundPathFindingNode = default;
+            
+            if (followingCharacterIndex < _PreviousMapTiles.Count)
+            {
+                foundPathFindingNode = _PreviousMapTiles[^(followingCharacterIndex + 1)];
+                return true;
+            }
+
+            var oldestPathNode = _PreviousMapTiles.Count > 0 ? _PreviousMapTiles[^1] : _CurrentMapTile;
+            foundPathFindingNode = oldestPathNode.NeighbourMapTiles.FirstOrDefault(node => node.IsWalkable);
+            return foundPathFindingNode != default;
+        }
+
+        private void ClearFollowingCharacters()
+        {
+            foreach (var character in _FollowingCharacters)
+            {
+                character.FollowedCharacter = null;
+            }
+            
+            _FollowingCharacters.Clear();
         }
     }
 }

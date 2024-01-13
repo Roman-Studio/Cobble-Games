@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50258e04793f46969e607a8bfc54ffc4, type: 3}
   m_Name: DefaultCharacterPreset
   m_EditorClassIdentifier: 
-  <MinMovementSpeed>k__BackingField: 1
+  <MinMovementSpeed>k__BackingField: 2
   <MaxMovementSpeed>k__BackingField: 5
-  <MinRotationSpeed>k__BackingField: 1
+  <MinRotationSpeed>k__BackingField: 2
   <MaxRotationSpeed>k__BackingField: 5
   <MinStamina>k__BackingField: 50
   <MaxStamina>k__BackingField: 150

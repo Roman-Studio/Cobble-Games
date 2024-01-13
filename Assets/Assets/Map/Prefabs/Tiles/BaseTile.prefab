@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5817938730512663131}
   - component: {fileID: 7469203164662665907}
   - component: {fileID: 5328806970604003982}
+  - component: {fileID: 7602926305897463072}
   m_Layer: 0
   m_Name: BaseTile
   m_TagString: Untagged
@@ -124,6 +125,21 @@ MonoBehaviour:
   _TileMovementCost: 1
   <X>k__BackingField: 0
   <Y>k__BackingField: 0
+  _NeighbourMapTiles: []
+--- !u!114 &7602926305897463072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2174827311516294148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c21b31867eee405ea5fce4964037a4d3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _TargetMapTile: {fileID: 5328806970604003982}
+  _TileRenderer: {fileID: 5817938730512663131}
 --- !u!1 &5445662894922160848
 GameObject:
   m_ObjectHideFlags: 0

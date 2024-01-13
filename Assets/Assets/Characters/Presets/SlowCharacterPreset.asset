@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 50258e04793f46969e607a8bfc54ffc4, type: 3}
   m_Name: SlowCharacterPreset
   m_EditorClassIdentifier: 
-  <MinMovementSpeed>k__BackingField: 1
-  <MaxMovementSpeed>k__BackingField: 2
-  <MinRotationSpeed>k__BackingField: 1
-  <MaxRotationSpeed>k__BackingField: 2
+  <MinMovementSpeed>k__BackingField: 2
+  <MaxMovementSpeed>k__BackingField: 3
+  <MinRotationSpeed>k__BackingField: 2
+  <MaxRotationSpeed>k__BackingField: 3
   <MinStamina>k__BackingField: 100
   <MaxStamina>k__BackingField: 200
   <CharacterRandomColorPreset>k__BackingField: {fileID: 11400000, guid: 9b92a02a5961fdd4fb6617183bcfb944,

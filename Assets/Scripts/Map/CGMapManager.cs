@@ -1,4 +1,5 @@
-﻿using CobbleGames.Core;
+﻿using System;
+using CobbleGames.Core;
 using CobbleGames.Grid;
 using NaughtyAttributes;
 using UnityEngine;
@@ -12,6 +13,9 @@ namespace CobbleGames.Map
 
         [field: SerializeField, ReadOnly]
         public CGGrid<CGMapTile> GeneratedGrid { get; private set; }
+
+        public event Action EventAnyGridStateChanged;
+        public void InvokeEventAnyGridStateChanged() => EventAnyGridStateChanged?.Invoke();
         
         public void Initialize()
         {

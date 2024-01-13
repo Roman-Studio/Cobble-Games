@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using CobbleGames.Characters;
 using CobbleGames.Grid;
 using CobbleGames.PathFinding;
 using NaughtyAttributes;
@@ -24,11 +26,56 @@ namespace CobbleGames.Map
         public int Y { get; set; }
 
         public Vector3 NodePosition => TileSurfaceCenter.position;
+
+        private Bounds _NodeBounds;
+        public Bounds NodeBounds
+        {
+            get
+            {
+                if (_NodeBounds != default)
+                {
+                    return _NodeBounds;
+                }
+                
+                var boundsSize = CGPathFindingManager.Instance.GridFromWorldPositionDetectionTolerance;
+                _NodeBounds = new Bounds(NodePosition, new Vector3(boundsSize, boundsSize, boundsSize));
+                return _NodeBounds;
+            }
+        }
+        
         public float WalkingCost => _TileMovementCost;
-        public bool IsWalkable => _IsWalkable;
+        public bool IsWalkable => _IsWalkable && !IsOccupied;
 
         [SerializeField, ReadOnly, Foldout("Debug")]
         private List<CGMapTile> _NeighbourMapTiles = new ();
+        public IReadOnlyList<CGMapTile> NeighbourMapTiles => _NeighbourMapTiles;
+        
+        public ICGTileAssignable CurrentlyAssignedObject { get; private set; }
+        public bool IsOccupied => CurrentlyAssignedObject != default;
+
+        public void AssignObject(ICGTileAssignable tileAssignable)
+        {
+            if (tileAssignable == null)
+            {
+                CurrentlyAssignedObject = null;
+                CGMapManager.Instance.InvokeEventAnyGridStateChanged();
+                return;
+            }
+            
+            if (tileAssignable.CurrentMapTile != null)
+            {
+                tileAssignable.CurrentMapTile.AssignObject(null);
+            }
+            
+            if (CurrentlyAssignedObject != default)
+            {
+                CurrentlyAssignedObject.CurrentMapTile = null;
+            }
+
+            CurrentlyAssignedObject = tileAssignable;
+            tileAssignable.CurrentMapTile = this;
+            CGMapManager.Instance.InvokeEventAnyGridStateChanged();
+        }
 
         public void GetNeighbourMapTiles(CGGrid<CGMapTile> mapTilesGrid)
         {
@@ -92,6 +139,12 @@ namespace CobbleGames.Map
             }
             
             _NeighbourMapTiles.Add(foundMapTile);
+        }
+
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawCube(NodeBounds.center, NodeBounds.size);
         }
     }
 }

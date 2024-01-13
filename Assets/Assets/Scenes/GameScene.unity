@@ -462,7 +462,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _DontDestroyOnLoad: 1
-  _GridFromWorldPositionDetectionTolerance: 0.5
+  _GridFromWorldPositionDetectionTolerance: 1
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -713,6 +713,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: CharactersList
+      objectReference: {fileID: 0}
+    - target: {fileID: 2238417636244765368, guid: 27b57077741d0ee4e976a034e60ab6a2,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2238417636244765368, guid: 27b57077741d0ee4e976a034e60ab6a2,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7422240674507852360, guid: 27b57077741d0ee4e976a034e60ab6a2,
         type: 3}

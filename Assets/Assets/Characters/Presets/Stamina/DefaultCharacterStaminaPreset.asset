@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: DefaultCharacterStaminaPreset
   m_EditorClassIdentifier: 
   <StaminaCostMultiplier>k__BackingField: 5
-  <StaminaRestingThreshold>k__BackingField: 25
+  <StaminaRestingThreshold>k__BackingField: 50
   <StaminaRegenerationTimeInterval>k__BackingField: 1
   <StaminaRegenerationValue>k__BackingField: 5

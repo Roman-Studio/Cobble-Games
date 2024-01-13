@@ -33,7 +33,7 @@ namespace CobbleGames.Characters
         public Vector3 CurrentMovementDirection { get; private set; }
 
         public event Action EventNextMovementTargetPositionChanged;
-        
+        public event Action EventCurrentPathChanged;
 
         private void Update()
         {
@@ -84,7 +84,7 @@ namespace CobbleGames.Characters
                 _PathVectors.Add(pathTransform.position);
             }
             
-            EventNextMovementTargetPositionChanged?.Invoke();
+            EventCurrentPathChanged?.Invoke();
         }
 
         public void SetPathVectors(IEnumerable<Vector3> pathVectors)
@@ -96,7 +96,7 @@ namespace CobbleGames.Characters
                 _PathVectors.Add(pathTransform);
             }
             
-            EventNextMovementTargetPositionChanged?.Invoke();
+            EventCurrentPathChanged?.Invoke();
         }
 
         public void SetPathVectors(IEnumerable<ICGPathFindingNode> pathFindingNodes)
@@ -108,7 +108,7 @@ namespace CobbleGames.Characters
                 _PathVectors.Add(pathFindingNode.NodePosition);
             }
             
-            EventNextMovementTargetPositionChanged?.Invoke();
+            EventCurrentPathChanged?.Invoke();
         }
     }
 }
