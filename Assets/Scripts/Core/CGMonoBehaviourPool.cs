@@ -20,6 +20,11 @@ namespace CobbleGames.Core
         protected List<PooledObject<TPoolElement>> _CurrentlyActiveObjects = new();
         protected bool _ScenePrefabPresentInPool;
 
+        protected virtual void Start()
+        {
+            _PoolElementPrefab.gameObject.SetActive(false);
+        }
+
         protected virtual TPoolElement CreatePoolElementInstance()
         {
             if (string.IsNullOrEmpty(_PoolElementPrefab.gameObject.scene.name) || _ScenePrefabPresentInPool)
@@ -51,10 +56,22 @@ namespace CobbleGames.Core
         {
             ClearActive();
 
-            foreach (var objectToBind in collectionToBind)
+            var pooledElements = new List<TPoolElement>();
+
+            foreach (var _ in collectionToBind)
             {
                 _CurrentlyActiveObjects.Add(ObjectPool.Get(out var pooledElement));
-                pooledElement.Set(objectToBind);
+                pooledElements.Add(pooledElement);
+            }
+            
+            pooledElements.Sort((a,b) => a.transform.GetSiblingIndex().CompareTo(b.transform.GetSiblingIndex()));
+
+            var index = 0;
+            
+            foreach (var objectToBind in collectionToBind)
+            {
+                pooledElements[index].Set(objectToBind);
+                index++;
             }
         }
 

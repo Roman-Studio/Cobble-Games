@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using CobbleGames.Camera.Modules;
 using CobbleGames.Core;
+using CobbleGames.SaveSystem;
+using CobbleGames.SaveSystem.Data;
 using NaughtyAttributes;
 using UnityEngine;
 
 namespace CobbleGames.Camera
 {
-    public class CGCamera : CGSingletonMonoBehaviour<CGCamera>
+    public class CGCamera : CGSingletonMonoBehaviour<CGCamera>, ICGGameSaveClient
     {
         [field: SerializeField]
         public UnityEngine.Camera UnityCamera { get; private set; }
@@ -20,8 +22,10 @@ namespace CobbleGames.Camera
         [field: SerializeField]
         public bool BlockCamera { get; set; }
         
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
+            
             foreach (var module in _CameraModules)
             {
                 module.Initialize();
@@ -87,6 +91,38 @@ namespace CobbleGames.Camera
             );
 
             transformToClamp.position = transformPosition;
+        }
+
+        public string ClientID => nameof(CGCamera);
+        public int LoadOrder => 0;
+
+        private const string CameraPositionSaveKey = "CameraPosition";
+        private const string CameraZoomSaveKey = "CameraZoom";
+        
+        public CGSaveDataEntryDictionary GetSaveData()
+        {
+            var saveData = new CGSaveDataEntryDictionary();
+
+            saveData.TryAddDataEntry(CameraPositionSaveKey, transform.position.GetSaveData());
+            saveData.TryAddDataEntry(CameraZoomSaveKey, new CGSaveDataEntryFloat(UnityCamera.orthographicSize));
+
+            return saveData;
+        }
+
+        public void LoadDataFromSave(CGSaveDataEntryDictionary saveData)
+        {
+            if (saveData.TryGetDataEntry(CameraPositionSaveKey, out CGSaveDataEntryList cameraPositionDataList))
+            {
+                if (cameraPositionDataList.TryLoadFromSaveData(out Vector3 cameraPosition))
+                {
+                    transform.position = cameraPosition;
+                }
+            }
+
+            if (saveData.TryGetDataValue(CameraZoomSaveKey, out float cameraZoom))
+            {
+                UnityCamera.orthographicSize = cameraZoom;
+            }
         }
     }
 }

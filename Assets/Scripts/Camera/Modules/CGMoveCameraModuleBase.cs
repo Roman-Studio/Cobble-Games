@@ -34,9 +34,9 @@ namespace CobbleGames.Camera.Modules
             var cameraForward = cameraTransform.forward;
             
             MainCamera.transform.position +=  new Vector3(
-                cameraForward.x * Time.unscaledDeltaTime * GetMovementSpeedWithZoomModifier(speed),
+                cameraForward.x * MainCamera.CameraConfig.DeltaTime * GetMovementSpeedWithZoomModifier(speed),
                 0,
-                cameraForward.z * Time.unscaledDeltaTime * GetMovementSpeedWithZoomModifier(speed));
+                cameraForward.z * MainCamera.CameraConfig.DeltaTime * GetMovementSpeedWithZoomModifier(speed));
 
             MainCamera.ClampTransformToCameraLimits(cameraTransform);
         }
@@ -52,9 +52,9 @@ namespace CobbleGames.Camera.Modules
             var cameraForward = cameraTransform.forward;
             
             MainCamera.transform.position -=  new Vector3(
-                cameraForward.x * Time.unscaledDeltaTime * GetMovementSpeedWithZoomModifier(speed),
+                cameraForward.x * MainCamera.CameraConfig.DeltaTime * GetMovementSpeedWithZoomModifier(speed),
                 0,
-                cameraForward.z * Time.unscaledDeltaTime * GetMovementSpeedWithZoomModifier(speed));
+                cameraForward.z * MainCamera.CameraConfig.DeltaTime * GetMovementSpeedWithZoomModifier(speed));
 
             MainCamera.ClampTransformToCameraLimits(cameraTransform);
         }
@@ -70,9 +70,9 @@ namespace CobbleGames.Camera.Modules
             var cameraRight = cameraTransform.right;
             
             MainCamera.transform.position -= new Vector3(
-                cameraRight.x * Time.unscaledDeltaTime * GetMovementSpeedWithZoomModifier(speed),
+                cameraRight.x * MainCamera.CameraConfig.DeltaTime * GetMovementSpeedWithZoomModifier(speed),
                 0,
-                cameraRight.z * Time.unscaledDeltaTime * GetMovementSpeedWithZoomModifier(speed));
+                cameraRight.z * MainCamera.CameraConfig.DeltaTime * GetMovementSpeedWithZoomModifier(speed));
 
             MainCamera.ClampTransformToCameraLimits(cameraTransform);
         }
@@ -88,9 +88,9 @@ namespace CobbleGames.Camera.Modules
             var cameraRight = cameraTransform.right;
             
             MainCamera.transform.position += new Vector3(
-                cameraRight.x * Time.unscaledDeltaTime * GetMovementSpeedWithZoomModifier(speed),
+                cameraRight.x * MainCamera.CameraConfig.DeltaTime * GetMovementSpeedWithZoomModifier(speed),
                 0,
-                cameraRight.z * Time.unscaledDeltaTime * GetMovementSpeedWithZoomModifier(speed));
+                cameraRight.z * MainCamera.CameraConfig.DeltaTime * GetMovementSpeedWithZoomModifier(speed));
 
             MainCamera.ClampTransformToCameraLimits(cameraTransform);
         }

@@ -42,7 +42,7 @@ namespace CobbleGames.Camera.Modules
                 return;
             }
 
-            var zoomDelta = _ZoomInputAction.action.ReadValue<float>() * MainCamera.CameraConfig.ZoomSpeed * Time.deltaTime;
+            var zoomDelta = _ZoomInputAction.action.ReadValue<float>() * MainCamera.CameraConfig.ZoomSpeed * MainCamera.CameraConfig.DeltaTime;
             var zoomValue = Mathf.Clamp(MainCamera.UnityCamera.orthographicSize + zoomDelta, 
                 MainCamera.CameraConfig.MovementBounds.MinCameraHeight, MainCamera.CameraConfig.MovementBounds.MaxCameraHeight);
             

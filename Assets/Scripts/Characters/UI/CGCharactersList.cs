@@ -4,8 +4,10 @@ namespace CobbleGames.Characters.UI
 {
     public class CGCharactersList : CGMonoBehaviourPool<CGCharacterButton, CGCharacter>
     {
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
+            
             if (CGCharactersManager.Instance == null)
             {
                 return;

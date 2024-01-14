@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using CobbleGames.Characters.Presets;
 using CobbleGames.Characters.UI;
+using CobbleGames.Core;
 using CobbleGames.Map;
 using CobbleGames.PathFinding;
+using CobbleGames.SaveSystem;
+using CobbleGames.SaveSystem.Data;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
@@ -12,7 +15,7 @@ using UnityEngine.EventSystems;
 
 namespace CobbleGames.Characters
 {
-    public class CGCharacter : MonoBehaviour, IPointerClickHandler, ICGTileAssignable
+    public class CGCharacter : MonoBehaviour, IPointerClickHandler, ICGTileAssignable, ICGGameSaveObject
     {
         [field: SerializeField]
         public float MovementSpeed { get; private set; }
@@ -53,9 +56,20 @@ namespace CobbleGames.Characters
         public event Action EventIsRestingChanged;
 
         public bool IsSelected => CGCharactersManager.Instance.SelectedCharacter == this;
-        
-        [field: SerializeField]
-        public Color CharacterColor { get; private set; }
+
+        [SerializeField]
+        private Color _CharacterColor;
+
+        public Color CharacterColor
+        {
+            get => _CharacterColor;
+            private set
+            {
+                _CharacterColor = value;
+                _CharacterRenderer.material.color = CharacterColor;
+                _CharacterPathDrawer.UpdateLineColor(CharacterColor);
+            }
+        }
         
         [SerializeField, ReadOnly]
         private CGMapTile _CurrentMapTile;
@@ -134,12 +148,10 @@ namespace CobbleGames.Characters
             CurrentStamina = Stamina;
             
             CharacterColor = characterColor;
-            _CharacterRenderer.material.color = CharacterColor;
-            _CharacterPathDrawer.UpdateLineColor(CharacterColor);
             
             _CharacterTracker.Set(this);
-            
             startMapTile.AssignObject(this);
+            
             UpdateCharacterPathDrawer();
             RegisterEvents();
         }
@@ -180,6 +192,11 @@ namespace CobbleGames.Characters
 
         private void OnDestroy()
         {
+            if (CurrentMapTile != null)
+            {
+                CurrentMapTile.AssignObject(null);
+            }
+            
             UnregisterEvents();
         }
         
@@ -271,14 +288,14 @@ namespace CobbleGames.Characters
 
         private void UpdateCharacterSpeed()
         {
-            if (_CurrentCharacterPath == null || _CurrentCharacterPath.Count == 0)
-            {
-                return;
-            }
-
             if (IsResting && CurrentStamina / Stamina * 100f >= CGCharactersManager.Instance.CharacterStaminaPreset.StaminaRestingThreshold)
             {
                 IsResting = false;
+            }
+            
+            if (_CurrentCharacterPath == null || _CurrentCharacterPath.Count == 0)
+            {
+                return;
             }
 
             if (CurrentStamina == 0f || IsResting)
@@ -364,5 +381,141 @@ namespace CobbleGames.Characters
             
             _FollowingCharacters.Clear();
         }
+
+    #region Save System
+
+        private const string PositionSaveKey = "Position";
+        private const string RotationSaveKey = "Rotation";
+        
+        public CGSaveDataEntryDictionary GetSaveData()
+        {
+            var saveData = new CGSaveDataEntryDictionary();
+
+            SaveCharacterTransform(saveData);
+            SaveCharacterStats(saveData);
+            SaveCharacterColor(saveData);
+            SaveCurrentTile(saveData);
+            return saveData;
+        }
+
+        private void SaveCharacterTransform(CGSaveDataEntryDictionary saveData)
+        {
+            saveData.TryAddDataEntry(PositionSaveKey, transform.position.GetSaveData());
+            saveData.TryAddDataEntry(RotationSaveKey, transform.eulerAngles.GetSaveData());
+        }
+
+        private void SaveCharacterStats(CGSaveDataEntryDictionary saveData)
+        {
+            saveData.TryAddDataEntry(nameof(MovementSpeed), new CGSaveDataEntryFloat(MovementSpeed));
+            saveData.TryAddDataEntry(nameof(RotationSpeed), new CGSaveDataEntryFloat(RotationSpeed));
+            saveData.TryAddDataEntry(nameof(Stamina), new CGSaveDataEntryFloat(Stamina));
+            saveData.TryAddDataEntry(nameof(CurrentStamina), new CGSaveDataEntryFloat(CurrentStamina));
+            saveData.TryAddDataEntry(nameof(IsResting), new CGSaveDataEntryBool(IsResting));
+        }
+
+        private void SaveCharacterColor(CGSaveDataEntryDictionary saveData)
+        {
+            saveData.TryAddDataEntry(nameof(CharacterColor), CharacterColor.GetSaveData());
+        }
+
+        private void SaveCurrentTile(CGSaveDataEntryDictionary saveData)
+        {
+            var currentTileSaveData = new CGSaveDataEntryList();
+            currentTileSaveData.AddListEntry(new CGSaveDataEntryInt(CurrentMapTile.X));
+            currentTileSaveData.AddListEntry(new CGSaveDataEntryInt(CurrentMapTile.Y));
+            
+            saveData.TryAddDataEntry(nameof(CurrentMapTile), currentTileSaveData);
+        }
+
+        public void LoadDataFromSave(CGSaveDataEntryDictionary saveData)
+        {
+            LoadCharacterTransform(saveData);
+            LoadCharacterStats(saveData);
+            LoadCharacterColor(saveData);
+            LoadCurrentTile(saveData);
+        }
+
+        private void LoadCharacterTransform(CGSaveDataEntryDictionary saveData)
+        {
+            if (saveData.TryGetDataEntry(PositionSaveKey, out CGSaveDataEntryList positionDataList))
+            {
+                if (positionDataList.TryLoadFromSaveData(out Vector3 position))
+                {
+                    transform.position = position;
+                }
+            }
+
+            if (!saveData.TryGetDataEntry(RotationSaveKey, out CGSaveDataEntryList rotationDataList))
+            {
+                return;
+            }
+            
+            if (rotationDataList.TryLoadFromSaveData(out Vector3 rotation))
+            {
+                transform.eulerAngles = rotation;
+            }
+        }
+
+        private void LoadCharacterStats(CGSaveDataEntryDictionary saveData)
+        {
+            if (saveData.TryGetDataValue(nameof(MovementSpeed), out float movementSpeed))
+            {
+                MovementSpeed = movementSpeed;
+            }
+            
+            if (saveData.TryGetDataValue(nameof(RotationSpeed), out float rotationSpeed))
+            {
+                RotationSpeed = rotationSpeed;
+            }
+            
+            if (saveData.TryGetDataValue(nameof(Stamina), out float stamina))
+            {
+                Stamina = stamina;
+            }
+            
+            if (saveData.TryGetDataValue(nameof(CurrentStamina), out float currentStamina))
+            {
+                CurrentStamina = currentStamina;
+            }
+            
+            if (saveData.TryGetDataValue(nameof(IsResting), out bool isResting))
+            {
+                IsResting = isResting;
+            }
+        }
+
+        private void LoadCharacterColor(CGSaveDataEntryDictionary saveData)
+        {
+            if (!saveData.TryGetDataEntry(nameof(CharacterColor), out CGSaveDataEntryList characterColorDataList))
+            {
+                return;
+            }
+            
+            if (characterColorDataList.TryLoadFromSaveData(out Color characterColor))
+            {
+                CharacterColor = characterColor;
+            }
+        }
+
+        private void LoadCurrentTile(CGSaveDataEntryDictionary saveData)
+        {
+            if (!saveData.TryGetDataEntry(nameof(CurrentMapTile), out CGSaveDataEntryList currentMapTileDataList))
+            {
+                return;
+            }
+            
+            var gridX = (int)currentMapTileDataList.DataList[0].GetData();
+            var gridY = (int)currentMapTileDataList.DataList[1].GetData();
+                
+            if(!CGMapManager.Instance.GeneratedGrid.TryGetElement(gridX, gridY, out var foundTile))
+            {
+                Debug.LogError($"[{nameof(CGCharacter)}.{nameof(LoadCurrentTile)}] Failed to get map tile at ({gridX}, {gridY})!", this);
+                return;
+            }
+
+            CurrentMapTile = foundTile;
+        }
+        
+    #endregion
     }
 }

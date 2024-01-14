@@ -11,7 +11,7 @@ namespace CobbleGames.Core
 
         public virtual void Set(TObservedType newObservedObject)
         {
-            if (ReferenceEquals(ObservedObject, newObservedObject))
+            if (Equals(ObservedObject, newObservedObject))
             {
                 return;
             }
@@ -42,7 +42,7 @@ namespace CobbleGames.Core
     {
         protected bool RequestedUpdateInThisFrame;
         
-        protected void OnDisable()
+        protected virtual void OnDisable()
         {
             RequestedUpdateInThisFrame = false;
         }

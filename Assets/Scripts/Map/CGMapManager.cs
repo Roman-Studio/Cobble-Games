@@ -1,18 +1,23 @@
 ﻿using System;
 using CobbleGames.Core;
 using CobbleGames.Grid;
+using CobbleGames.SaveSystem;
+using CobbleGames.SaveSystem.Data;
 using NaughtyAttributes;
 using UnityEngine;
 
 namespace CobbleGames.Map
 {
-    public class CGMapManager : CGManager<CGMapManager>
+    public class CGMapManager : CGManager<CGMapManager>, ICGGameSaveClient
     {
         [SerializeField]
         private CGMapGenerator _MapGenerator;
 
         [field: SerializeField, ReadOnly]
         public CGGrid<CGMapTile> GeneratedGrid { get; private set; }
+
+        [ShowNonSerializedField, ReadOnly]
+        private int _CurrentMapSeed;
 
         public event Action EventAnyGridStateChanged;
         public void InvokeEventAnyGridStateChanged() => EventAnyGridStateChanged?.Invoke();
@@ -27,8 +32,14 @@ namespace CobbleGames.Map
         [Button, EnableIf(nameof(IsPlaying))]
         private void GenerateRandomMap()
         {
+            GenerateMapFromSeed(DateTime.Now.GetHashCode());
+        }
+
+        private void GenerateMapFromSeed(int seed)
+        {
             GeneratedGrid.ForEach(DestroyTile);
-            _MapGenerator.GenerateNewMap(out var generatedMapGrid);
+            _CurrentMapSeed = seed;
+            _MapGenerator.GenerateNewMap((uint)_CurrentMapSeed, out var generatedMapGrid);
             GeneratedGrid = generatedMapGrid;
         }
 
@@ -40,6 +51,22 @@ namespace CobbleGames.Map
             }
             
             Destroy(mapTile.gameObject);
+        }
+
+        public string ClientID => nameof(CGMapManager);
+        public int LoadOrder => 0;
+
+        public CGSaveDataEntryDictionary GetSaveData()
+        {
+            var saveData = new CGSaveDataEntryDictionary();
+            saveData.TryAddDataEntry(nameof(_CurrentMapSeed), new CGSaveDataEntryInt(_CurrentMapSeed));
+            return saveData;
+        }
+
+        public void LoadDataFromSave(CGSaveDataEntryDictionary saveData)
+        {
+            saveData.TryGetDataValue(nameof(_CurrentMapSeed), out _CurrentMapSeed);
+            GenerateMapFromSeed(_CurrentMapSeed);
         }
     }
 }

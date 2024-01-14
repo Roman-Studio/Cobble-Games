@@ -9,9 +9,12 @@ namespace CobbleGames.Map
     {
         [field: SerializeField, Expandable]
         public CGMapGeneratorPreset MapGeneratorPreset { get; set; }
+
+        private Unity.Mathematics.Random _MapGeneratorRandom;
         
-        public void GenerateNewMap(out CGGrid<CGMapTile> generatedMapGrid)
+        public void GenerateNewMap(uint seed, out CGGrid<CGMapTile> generatedMapGrid)
         {
+            _MapGeneratorRandom = new Unity.Mathematics.Random(seed);
             generatedMapGrid = new CGGrid<CGMapTile>(MapGeneratorPreset.MapSizeX, MapGeneratorPreset.MapSizeY);
 
             if (MapGeneratorPreset.MapTilesPrefabs.Count == 0)
@@ -37,7 +40,7 @@ namespace CobbleGames.Map
 
         private void SpawnRandomTile(int x, int y, CGGrid<CGMapTile> targetGrid)
         {
-            var randomTilePrefabIndex = Random.Range(0, MapGeneratorPreset.MapTilesPrefabs.Count);
+            var randomTilePrefabIndex = _MapGeneratorRandom.NextInt(0, MapGeneratorPreset.MapTilesPrefabs.Count);
             var spawnedMapTile = Instantiate(MapGeneratorPreset.MapTilesPrefabs[randomTilePrefabIndex], transform).GetComponent<CGMapTile>();
 
             var mapOriginPosition = transform.position;

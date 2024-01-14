@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using CobbleGames.SaveSystem;
+using UnityEngine;
 
 namespace CobbleGames.Core
 {
@@ -39,9 +40,22 @@ namespace CobbleGames.Core
                 Destroy(gameObject);
             }
         }
+        
+        protected virtual void Start()
+        {
+            if (this is ICGGameSaveClient gameSaveClient && CGSaveManager.Instance != null)
+            {
+                CGSaveManager.Instance.AddGameSaveClient(gameSaveClient);
+            }
+        }
 
         protected virtual void OnDestroy()
         {
+            if (this is ICGGameSaveClient gameSaveClient && CGSaveManager.Instance != null)
+            {
+                CGSaveManager.Instance.TryRemoveGameSaveClient(gameSaveClient);
+            }
+            
             if (instance == this)
             {
                 instance = null;

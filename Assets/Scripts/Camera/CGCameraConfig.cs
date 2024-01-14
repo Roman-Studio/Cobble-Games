@@ -6,6 +6,9 @@ namespace CobbleGames.Camera
     [CreateAssetMenu(fileName = "CameraConfig", menuName = "Cobble Games/Camera/Config")]
     public class CGCameraConfig : ScriptableObject
     {
+        [SerializeField]
+        private bool _UseUnscaledTime;
+        
         [SerializeField, Foldout("Zoom")]
         private float _ZoomSpeed = 1f;
         
@@ -33,6 +36,7 @@ namespace CobbleGames.Camera
         [SerializeField, ShowIf(nameof(EnableDragMovement)), Foldout("Movement")]
         private float _DragPlaneHeight;
 
+        public float DeltaTime => _UseUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
         public float ZoomSpeed => _ZoomSpeed;
         public float GetZoomCameraMovementSpeedModifier(float currentZoom) => _ZoomCameraMovementSpeedModifier.Evaluate(currentZoom);
         

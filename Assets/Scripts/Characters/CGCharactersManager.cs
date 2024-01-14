@@ -6,13 +6,15 @@ using CobbleGames.Characters.Presets;
 using CobbleGames.Core;
 using CobbleGames.Map;
 using CobbleGames.PathFinding;
+using CobbleGames.SaveSystem;
+using CobbleGames.SaveSystem.Data;
 using NaughtyAttributes;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace CobbleGames.Characters
 {
-    public class CGCharactersManager : CGManager<CGCharactersManager>
+    public class CGCharactersManager : CGManager<CGCharactersManager>, ICGGameSaveClient, IComparable<CGCharactersManager>
     {
         [SerializeField]
         private int _CharactersToSpawn = 3;
@@ -41,12 +43,10 @@ namespace CobbleGames.Characters
         public event Action EventSelectedCharacterChanged;
 
         private Coroutine _EnergyRegenerationCoroutine;
+        private ICGGameSaveClient _GameSaveClientImplementation;
 
         public event Action<float> EventRegenerateCharacterEnergy;
-        
-        private readonly Dictionary<CGCharacter, ICGPathFindingNode> _CharacterPathFindingTargets = new();
-        public IReadOnlyDictionary<CGCharacter, ICGPathFindingNode> CharacterPathFindingTargets => _CharacterPathFindingTargets;
-        
+
         public void Initialize()
         {
             SpawnRandomCharacters(_CharactersToSpawn);
@@ -57,33 +57,37 @@ namespace CobbleGames.Characters
         {
             for (var i = 0; i < charactersToSpawn; i++)
             {
-                SpawnRandomCharacter();
+                TrySpawnRandomCharacter(out _);
             }
         }
 
         [Button]
-        private void SpawnRandomCharacter()
+        private bool TrySpawnRandomCharacter(out CGCharacter spawnedCharacter)
         {
+            spawnedCharacter = null;
+            
             if (_CharacterPresets.Count == 0)
             {
-                Debug.LogError($"[{nameof(CGCharactersManager)}.{nameof(SpawnRandomCharacter)}] There are no character presets assigned in the {nameof(CGCharactersManager)}!", this);
-                return;
+                Debug.LogError($"[{nameof(CGCharactersManager)}.{nameof(TrySpawnRandomCharacter)}] There are no character presets assigned in the {nameof(CGCharactersManager)}!", this);
+                return false;
             }
-            
-            var randomPreset = _CharacterPresets[Random.Range(0, _CharacterPresets.Count)];
 
             if (!TryGetRandomMapTile(out var randomMapTile))
             {
-                Debug.LogError($"[{nameof(CGCharactersManager)}.{nameof(SpawnRandomCharacter)}] Failed to find random map tile!", this);
-                return;
+                Debug.LogError($"[{nameof(CGCharactersManager)}.{nameof(TrySpawnRandomCharacter)}] Failed to find random map tile!", this);
+                return false;
             }
 
-            var newCharacter = Instantiate(_CharacterPrefab, transform).GetComponent<CGCharacter>();
-            newCharacter.transform.position = randomMapTile.TileSurfaceCenter.position;
-            newCharacter.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-            newCharacter.Initialize(randomPreset, randomMapTile);
-            _SpawnedCharacters.Add(newCharacter);
+            var randomPreset = _CharacterPresets[Random.Range(0, _CharacterPresets.Count)];
+            
+            spawnedCharacter = Instantiate(_CharacterPrefab, transform).GetComponent<CGCharacter>();
+            spawnedCharacter.transform.position = randomMapTile.TileSurfaceCenter.position;
+            spawnedCharacter.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+            spawnedCharacter.Initialize(randomPreset, randomMapTile);
+            
+            _SpawnedCharacters.Add(spawnedCharacter);
             EventSpawnedCharactersChanged?.Invoke();
+            return true;
         }
         
         private bool TryGetRandomMapTile(out CGMapTile randomMapTile)
@@ -141,14 +145,56 @@ namespace CobbleGames.Characters
             }
         }
 
-        public void AddCharacterPathFindingTarget(CGCharacter character, ICGPathFindingNode targetMapTile)
+        private void DestroyAllSpawnedCharacters()
         {
-            _CharacterPathFindingTargets[character] = targetMapTile;
+            foreach (var character in _SpawnedCharacters)
+            {
+                Destroy(character.gameObject);
+            }
+            
+            _SpawnedCharacters.Clear();
         }
 
-        public void RemoveCharacterPathFindingTarget(CGCharacter character)
+        public string ClientID => nameof(CGCharactersManager);
+        public int LoadOrder => 1;
+
+        public CGSaveDataEntryDictionary GetSaveData()
         {
-            _CharacterPathFindingTargets.Remove(character);
+            var result = new CGSaveDataEntryDictionary();
+
+            result.TryAddDataEntry(nameof(SpawnedCharacters), SpawnedCharacters.GetSaveData());
+
+            return result;
+        }
+
+        public void LoadDataFromSave(CGSaveDataEntryDictionary saveData)
+        {
+            LoadSpawnedCharacters(saveData);
+        }
+
+        private void LoadSpawnedCharacters(CGSaveDataEntryDictionary saveData)
+        {
+            if (!saveData.TryGetDataEntry(nameof(SpawnedCharacters), out CGSaveDataEntryList spawnedCharactersDataList))
+            {
+                return;
+            }
+
+            DestroyAllSpawnedCharacters();
+
+            foreach (var characterDataEntry in spawnedCharactersDataList.DataList.OfType<CGSaveDataEntryDictionary>())
+            {
+                if (!TrySpawnRandomCharacter(out var spawnedCharacter))
+                {
+                    continue;
+                }
+                
+                spawnedCharacter.LoadDataFromSave(characterDataEntry);
+            }
+        }
+
+        public int CompareTo(CGCharactersManager other)
+        {
+            throw new NotImplementedException();
         }
     }
 }

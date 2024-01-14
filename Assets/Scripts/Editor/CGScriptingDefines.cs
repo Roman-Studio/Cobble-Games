@@ -12,6 +12,12 @@ namespace CobbleGames.Editor
         [MenuItem("Cobble Games/Path Finding/Disable Debug Mode")]
         public static void DisablePathFindingDebug() => SetScriptingDefine("PATHFINDING_DEBUG", false);
         
+        [MenuItem("Cobble Games/Save System/Enable Debug Mode")]
+        public static void EnableSaveDebug() => SetScriptingDefine("SAVE_DEBUG", true);
+    
+        [MenuItem("Cobble Games/Save System/Disable Debug Mode")]
+        public static void DisableSaveDebug() => SetScriptingDefine("SAVE_DEBUG", false);
+        
         private static void SetScriptingDefine(string scriptingDefine, bool enabled)
         {
             PlayerSettings.GetScriptingDefineSymbolsForGroup(BuildTargetGroup.Standalone, out var currentScriptingDefines);
