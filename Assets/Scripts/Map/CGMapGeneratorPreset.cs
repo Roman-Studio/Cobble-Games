@@ -7,8 +7,8 @@ namespace CobbleGames.Map
     public class CGMapGeneratorPreset : ScriptableObject
     {
         [SerializeField]
-        private List<CGMapTile> _MapTilesPrefabs = new();
-        public IReadOnlyList<CGMapTile> MapTilesPrefabs => _MapTilesPrefabs;
+        private List<CGAssetReferenceMapTile> _MapTilesPrefabs = new();
+        public IReadOnlyList<CGAssetReferenceMapTile> MapTilesPrefabs => _MapTilesPrefabs;
 
         [field: SerializeField]
         public int MapSizeX { get; private set; } = 50;

@@ -13,8 +13,14 @@ MonoBehaviour:
   m_Name: NoWater
   m_EditorClassIdentifier: 
   _MapTilesPrefabs:
-  - {fileID: 3994754012147723660, guid: 7ab728020dffb7546a6def9415a51dec, type: 3}
-  - {fileID: 7034626371054180417, guid: fe1fc6797e31b024abfdc3b57688e9ea, type: 3}
+  - m_AssetGUID: 7ab728020dffb7546a6def9415a51dec
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  - m_AssetGUID: fe1fc6797e31b024abfdc3b57688e9ea
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 1
   <MapSizeX>k__BackingField: 50
   <MapSizeY>k__BackingField: 50
   <TileSize>k__BackingField: 1

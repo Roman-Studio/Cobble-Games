@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: MapTiles
+  m_EditorClassIdentifier: 
+  m_GroupName: MapTiles
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 514a2694efc3485458dbf95e86a494c6
+  m_SerializeEntries:
+  - m_GUID: e8f73130bd9c3424192cf45b3e57d4c0
+    m_Address: Assets/Assets/Map/Prefabs/Tiles
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: bfe2f871a36bc2541bbee9496f77fb4b, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: aea52b7ff6b10cd459b50da02b604600, type: 2}
+    - {fileID: 11400000, guid: f10f92e3052df6344987acc56622e446, type: 2}

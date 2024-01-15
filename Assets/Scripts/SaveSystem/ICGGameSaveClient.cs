@@ -6,6 +6,7 @@ namespace CobbleGames.SaveSystem
     {
         string ClientID { get; }
         int LoadOrder { get; }
+        bool IsLoading { get; }
 
         int IComparable<ICGGameSaveClient>.CompareTo(ICGGameSaveClient otherClient)
         {

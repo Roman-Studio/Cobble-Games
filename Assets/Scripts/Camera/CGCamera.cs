@@ -95,6 +95,7 @@ namespace CobbleGames.Camera
 
         public string ClientID => nameof(CGCamera);
         public int LoadOrder => 0;
+        public bool IsLoading { get; private set; }
 
         private const string CameraPositionSaveKey = "CameraPosition";
         private const string CameraZoomSaveKey = "CameraZoom";
@@ -111,6 +112,8 @@ namespace CobbleGames.Camera
 
         public void LoadDataFromSave(CGSaveDataEntryDictionary saveData)
         {
+            IsLoading = true;
+            
             if (saveData.TryGetDataEntry(CameraPositionSaveKey, out CGSaveDataEntryList cameraPositionDataList))
             {
                 if (cameraPositionDataList.TryLoadFromSaveData(out Vector3 cameraPosition))
@@ -123,6 +126,8 @@ namespace CobbleGames.Camera
             {
                 UnityCamera.orthographicSize = cameraZoom;
             }
+
+            IsLoading = false;
         }
     }
 }

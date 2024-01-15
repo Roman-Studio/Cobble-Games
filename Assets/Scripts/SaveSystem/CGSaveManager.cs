@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -164,7 +165,7 @@ namespace CobbleGames.SaveSystem
             await getSaveDataTask;
 
             SetSaveDataForRegisteredClients(getSaveDataTask.Result);
-            EventEndGameLoad?.Invoke();
+            StartCoroutine(InvokeEventEndGameLoad());
             Debug.Log($"[{nameof(CGSaveManager)}.{nameof(SaveGame)}] Game loaded!", this);
         }
 
@@ -186,6 +187,16 @@ namespace CobbleGames.SaveSystem
                 
                 saveClient.LoadDataFromSave(saveDataEntry);
             }
+        }
+
+        private IEnumerator InvokeEventEndGameLoad()
+        {
+            if (_GameSaveClients.Any(client => client.IsLoading))
+            {
+                yield return new WaitUntil(() => _GameSaveClients.All(client => !client.IsLoading));
+            }
+            
+            EventEndGameLoad?.Invoke();
         }
     }
 }

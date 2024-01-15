@@ -50,8 +50,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7fbe98f40d2da484db3f324c17cc174c, type: 2}
   - {fileID: 11400000, guid: fb430e241ec167c4a879282664170cf3, type: 2}
   - {fileID: 11400000, guid: b5ca6898967aeb148aaa592e4730acd1, type: 2}
-  _CharacterPrefab: {fileID: 5985362314592473525, guid: 9d4b972740cfc2142a67ec68aae58613,
-    type: 3}
+  _CharacterPrefab:
+    m_AssetGUID: 9d4b972740cfc2142a67ec68aae58613
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
   _CharacterSpawnPositionPreset: {fileID: 11400000, guid: 058b8faf1475fd2469a74b782069c6b0,
     type: 2}
   <CharacterStaminaPreset>k__BackingField: {fileID: 11400000, guid: 0abd29beea900194084ee33f9211ca83,

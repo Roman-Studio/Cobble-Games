@@ -10,6 +10,7 @@ using CobbleGames.SaveSystem;
 using CobbleGames.SaveSystem.Data;
 using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
@@ -196,7 +197,8 @@ namespace CobbleGames.Characters
             {
                 CurrentMapTile.AssignObject(null);
             }
-            
+
+            Addressables.ReleaseInstance(gameObject);
             UnregisterEvents();
         }
         
@@ -267,16 +269,17 @@ namespace CobbleGames.Characters
             {
                 return;
             }
-
-            if (NextPathNode is CGMapTile mapTile)
-            {
-                mapTile.AssignObject(this);
-            }
             
             CurrentStamina -= NextPathNode.WalkingCost * CGCharactersManager.Instance.CharacterStaminaPreset.StaminaCostMultiplier;
             _CurrentCharacterPath.RemoveAt(0);
             UpdateCharacterPathDrawer();
             UpdateCharacterSpeed();
+            
+            if (!IsResting && NextPathNode is CGMapTile mapTile)
+            {
+                mapTile.AssignObject(this);
+            }
+            
             UpdateFollowingCharacters();
         }
 
@@ -513,7 +516,9 @@ namespace CobbleGames.Characters
                 return;
             }
 
+            CurrentMapTile.AssignObject(null);
             CurrentMapTile = foundTile;
+            CurrentMapTile.AssignObject(this);
         }
         
     #endregion

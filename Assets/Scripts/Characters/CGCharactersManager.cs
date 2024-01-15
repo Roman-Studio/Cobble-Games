@@ -5,16 +5,17 @@ using System.Linq;
 using CobbleGames.Characters.Presets;
 using CobbleGames.Core;
 using CobbleGames.Map;
-using CobbleGames.PathFinding;
 using CobbleGames.SaveSystem;
 using CobbleGames.SaveSystem.Data;
 using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using Random = UnityEngine.Random;
 
 namespace CobbleGames.Characters
 {
-    public class CGCharactersManager : CGManager<CGCharactersManager>, ICGGameSaveClient, IComparable<CGCharactersManager>
+    public class CGCharactersManager : CGManager<CGCharactersManager>, ICGGameSaveClient
     {
         [SerializeField]
         private int _CharactersToSpawn = 3;
@@ -23,7 +24,7 @@ namespace CobbleGames.Characters
         private List<CGCharacterPreset> _CharacterPresets = new();
 
         [SerializeField]
-        private CGCharacter _CharacterPrefab;
+        private CGAssetReferenceCharacter _CharacterPrefab;
 
         [SerializeField, Expandable]
         private CGCharacterSpawnPositionPreset _CharacterSpawnPositionPreset;
@@ -49,44 +50,58 @@ namespace CobbleGames.Characters
 
         public void Initialize()
         {
-            SpawnRandomCharacters(_CharactersToSpawn);
+            RequestSpawnRandomCharacters(_CharactersToSpawn);
             StartEnergyRegenerator();
         }
 
-        private void SpawnRandomCharacters(int charactersToSpawn)
+        private void RequestSpawnRandomCharacters(int charactersToSpawn)
         {
-            for (var i = 0; i < charactersToSpawn; i++)
-            {
-                TrySpawnRandomCharacter(out _);
-            }
+            StartCoroutine(SpawnRandomCharacters(charactersToSpawn));
         }
 
-        [Button]
-        private bool TrySpawnRandomCharacter(out CGCharacter spawnedCharacter)
+        private IEnumerator SpawnRandomCharacters(int charactersToSpawn)
         {
-            spawnedCharacter = null;
+            if (CGMapManager.Instance.IsGeneratingMap)
+            {
+                yield return new WaitUntil(() => !CGMapManager.Instance.IsGeneratingMap);
+            }
+            
+            for (var i = 0; i < charactersToSpawn; i++)
+            {
+                RequestSpawnRandomCharacter(out _);
+            }
+        }
+        
+        private bool RequestSpawnRandomCharacter(out AsyncOperationHandle<CGCharacter> spawnedCharacterAsyncOperation)
+        {
+            spawnedCharacterAsyncOperation = default;
             
             if (_CharacterPresets.Count == 0)
             {
-                Debug.LogError($"[{nameof(CGCharactersManager)}.{nameof(TrySpawnRandomCharacter)}] There are no character presets assigned in the {nameof(CGCharactersManager)}!", this);
+                Debug.LogError($"[{nameof(CGCharactersManager)}.{nameof(RequestSpawnRandomCharacter)}] There are no character presets assigned in the {nameof(CGCharactersManager)}!", this);
                 return false;
             }
 
             if (!TryGetRandomMapTile(out var randomMapTile))
             {
-                Debug.LogError($"[{nameof(CGCharactersManager)}.{nameof(TrySpawnRandomCharacter)}] Failed to find random map tile!", this);
+                Debug.LogError($"[{nameof(CGCharactersManager)}.{nameof(RequestSpawnRandomCharacter)}] Failed to find random map tile!", this);
                 return false;
             }
 
-            var randomPreset = _CharacterPresets[Random.Range(0, _CharacterPresets.Count)];
+            spawnedCharacterAsyncOperation = _CharacterPrefab.InstantiateAsync(transform);
+            spawnedCharacterAsyncOperation.Completed += (handle) =>
+            {
+                var randomPreset = _CharacterPresets[Random.Range(0, _CharacterPresets.Count)];
+                var spawnedCharacter = handle.Result;
+                
+                spawnedCharacter.transform.position = randomMapTile.TileSurfaceCenter.position;
+                spawnedCharacter.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+                spawnedCharacter.Initialize(randomPreset, randomMapTile);
             
-            spawnedCharacter = Instantiate(_CharacterPrefab, transform).GetComponent<CGCharacter>();
-            spawnedCharacter.transform.position = randomMapTile.TileSurfaceCenter.position;
-            spawnedCharacter.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-            spawnedCharacter.Initialize(randomPreset, randomMapTile);
+                _SpawnedCharacters.Add(spawnedCharacter);
+                EventSpawnedCharactersChanged?.Invoke();
+            };
             
-            _SpawnedCharacters.Add(spawnedCharacter);
-            EventSpawnedCharactersChanged?.Invoke();
             return true;
         }
         
@@ -157,6 +172,7 @@ namespace CobbleGames.Characters
 
         public string ClientID => nameof(CGCharactersManager);
         public int LoadOrder => 1;
+        public bool IsLoading { get; private set; }
 
         public CGSaveDataEntryDictionary GetSaveData()
         {
@@ -169,6 +185,7 @@ namespace CobbleGames.Characters
 
         public void LoadDataFromSave(CGSaveDataEntryDictionary saveData)
         {
+            IsLoading = true;
             LoadSpawnedCharacters(saveData);
         }
 
@@ -176,25 +193,44 @@ namespace CobbleGames.Characters
         {
             if (!saveData.TryGetDataEntry(nameof(SpawnedCharacters), out CGSaveDataEntryList spawnedCharactersDataList))
             {
+                IsLoading = false;
                 return;
             }
 
             DestroyAllSpawnedCharacters();
+            StartCoroutine(InstantiateLoadedCharacters(spawnedCharactersDataList));
+        }
 
+        private IEnumerator InstantiateLoadedCharacters(CGSaveDataEntryList spawnedCharactersDataList)
+        {
+            if (CGMapManager.Instance.IsGeneratingMap)
+            {
+                yield return new WaitUntil(() => !CGMapManager.Instance.IsGeneratingMap);
+            }
+
+            var charactersToLoad = new List<AsyncOperationHandle<CGCharacter>>();
+            
             foreach (var characterDataEntry in spawnedCharactersDataList.DataList.OfType<CGSaveDataEntryDictionary>())
             {
-                if (!TrySpawnRandomCharacter(out var spawnedCharacter))
+                if (!RequestSpawnRandomCharacter(out var spawnedCharacter))
                 {
                     continue;
                 }
-                
-                spawnedCharacter.LoadDataFromSave(characterDataEntry);
-            }
-        }
 
-        public int CompareTo(CGCharactersManager other)
-        {
-            throw new NotImplementedException();
+                charactersToLoad.Add(spawnedCharacter);
+                spawnedCharacter.Completed += (handle) =>
+                {
+                    handle.Result.LoadDataFromSave(characterDataEntry);
+                    charactersToLoad.Remove(handle);
+                };
+            }
+
+            if (charactersToLoad.Count > 0)
+            {
+                yield return new WaitUntil(() => charactersToLoad.Count <= 0);
+            }
+
+            IsLoading = false;
         }
     }
 }

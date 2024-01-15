@@ -18,9 +18,15 @@ namespace CobbleGames.Tests
         private void Awake()
         {
             _OriginalTileColor = _TileRenderer.material.color;
+            _TargetMapTile.EventCurrentlyAssignedObjectChanged += UpdateTileColor;
         }
 
-        private void Update()
+        private void OnDestroy()
+        {
+            _TargetMapTile.EventCurrentlyAssignedObjectChanged -= UpdateTileColor;
+        }
+
+        private void UpdateTileColor()
         {
             _TileRenderer.material.color = _TargetMapTile.IsOccupied ? Color.red : _OriginalTileColor;
         }

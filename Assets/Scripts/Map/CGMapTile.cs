@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CobbleGames.Grid;
 using CobbleGames.PathFinding;
-using CobbleGames.SaveSystem.Data;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -52,11 +52,14 @@ namespace CobbleGames.Map
         public ICGTileAssignable CurrentlyAssignedObject { get; private set; }
         public bool IsOccupied => CurrentlyAssignedObject != default;
 
+        public event Action EventCurrentlyAssignedObjectChanged;
+
         public void AssignObject(ICGTileAssignable tileAssignable)
         {
             if (tileAssignable == null)
             {
                 CurrentlyAssignedObject = null;
+                EventCurrentlyAssignedObjectChanged?.Invoke();
                 CGMapManager.Instance.InvokeEventAnyGridStateChanged();
                 return;
             }
@@ -73,6 +76,7 @@ namespace CobbleGames.Map
 
             CurrentlyAssignedObject = tileAssignable;
             tileAssignable.CurrentMapTile = this;
+            EventCurrentlyAssignedObjectChanged?.Invoke();
             CGMapManager.Instance.InvokeEventAnyGridStateChanged();
         }
 
