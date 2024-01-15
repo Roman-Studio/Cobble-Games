@@ -2,7 +2,9 @@
     "name": "CobbleGames.Editor",
     "rootNamespace": "CobbleGames.Editor",
     "references": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

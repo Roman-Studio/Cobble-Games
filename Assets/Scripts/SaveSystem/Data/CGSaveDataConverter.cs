@@ -1,6 +1,6 @@
 ﻿using System;
-using Unity.Plastic.Newtonsoft.Json;
-using Unity.Plastic.Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CobbleGames.SaveSystem.Data
 {

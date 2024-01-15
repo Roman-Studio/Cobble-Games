@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CobbleGames.Core;
 using CobbleGames.SaveSystem.Data;
-using Unity.Plastic.Newtonsoft.Json;
+using Newtonsoft.Json;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
