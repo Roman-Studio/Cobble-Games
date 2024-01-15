@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CobbleGames.Core;
 using CobbleGames.PathFinding;
 using UnityEngine;
 
@@ -52,7 +53,7 @@ namespace CobbleGames.Characters
             var nextTargetPosition = _PathVectors[0];
             var currentPosition = transform.position;
 
-            if (Vector3.Distance(currentPosition, nextTargetPosition) <= _TargetTolerance)
+            if (Vector3.Distance(currentPosition, nextTargetPosition).IsInRangeInclusive(-_TargetTolerance, _TargetTolerance))
             {
                 _PathVectors.RemoveAt(0);
                 EventNextMovementTargetPositionChanged?.Invoke();
